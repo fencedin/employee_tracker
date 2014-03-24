@@ -16,8 +16,8 @@ end
 def main
   choice = nil
   until choice == 'x'
-    puts "Press 'e' to view employee menu"
-    puts "Press 'd' to view/edit divisions."
+    puts "Press 'e' to view employee menu."
+    puts "Press 'd' to view division menu."
     puts "Press 'x' to exit."
 
     case gets.chomp.downcase
@@ -26,7 +26,7 @@ def main
       employee_menu
     when 'd'
       clear
-      list_divisions
+      division_menu
     when 'x'
       clear
       puts "\nCiao!~\e[0m\n\n"
@@ -38,40 +38,35 @@ def main
   end
 end
 
+# ~~~~ EMPLOYEE ~~~~
+
 def employee_menu
   puts "All current employees:\n\n"
   Employee.all.each do |emp|
     puts "\t\e[92m" + emp.name + " -- " + Division.where({id: emp.division_id})[0].name
   end
   puts "\n\e[32mPress 'a' to add an employee."
-  puts "Press 'u' to update an employee."
+  puts "Press 'n' to update an employee name."
+  puts "Press 'u' to update an employee division."
   puts "Press 'd' to delete an employee."
   puts "Press 'b' to go back to main menu"
   case gets.chomp.downcase
   when 'a'
     add_employee
-  when 'l'
-    clear
-    list_employees
+  when 'n'
+    update_employee_name
   when 'u'
-    clear
-    update_employee
+    update_employee_id
   when 'b'
     clear
     main
   when 'd'
-    clear
     delete_employee
-  when 'x'
-    clear
-    puts "\nCiao!~\e[0m\n\n"
-    exit
   else
     puts "Not a valid option"
     main
   end
 end
-
 
 def add_employee
   puts "\nWhats the name of the employee?:"
@@ -86,31 +81,73 @@ def add_employee
 
   clear
   puts "\e[32m'#{employee_name}' is now being tracked by the '#{division_name}'.\n\n"
+  employee_menu
 end
 
-def list_employees
-  puts "Here is a list of all employees being tracked:\n\n"
-  Employee.all.each { |employee| puts "\t\e[92m" + employee.name }
-  puts "\n\e[32m"
+def update_employee_name
+  puts "Which employee name do you want to edit?"
+  current_employee = gets.chomp
+  editting_employee = Employee.where({name: current_employee}).first
+  puts "Enter the New Name:"
+  edit_input = gets.chomp
+  editting_employee.update({name: edit_input})
+  clear
+  puts "'#{current_employee}' has been updated to: '#{edit_input}'"
+  employee_menu
 end
 
+def update_employee_id
+  puts "Which employee division do you want to edit?"
+  current_employee = gets.chomp
+  editting_employee = Employee.where({name: current_employee}).first
+  Division.all.each { |division| puts "\t\e[92m" + division.name }
+  puts "\e[32mEnter the New Division:"
+  division_input = gets.chomp
+
+  id_to_update = Division.where({name: division_input})[0].id
+
+  editting_employee.update({division_id: id_to_update})
 
 
-def list_divisions
+
+  clear
+  puts "'#{current_employee}' has been updated to: '#{division_input}'"
+  employee_menu
+end
+
+def delete_employee
+  puts "Which employee do you want to delete?"
+  current_employee = gets.chomp
+  editting_employee = Employee.where({name: current_employee}).first
+  editting_employee.destroy
+  clear
+  puts "'#{current_employee}' was fired."
+  employee_menu
+end
+
+# ~~~~ DIVISION ~~~~
+
+def division_menu
   puts "Here is all the division the compmany:\n\n"
   Division.all.each { |division| puts "\t\e[92m" + division.name }
   puts "\n\e[32mPress 'a' to add a new division."
+  puts "Press 'u' to update a division."
+  puts "Press 'd' to delete a division."
   puts "Press 'b' to go back to main menu."
   case gets.chomp
   when 'a'
     add_division
+  when 'u'
+    update_division
+  when 'd'
+    delete_division
   when 'b'
     clear
     main
   else
     clear
     puts "not a valid option"
-    list_divisions
+    division_menu
   end
 end
 
@@ -120,8 +157,32 @@ def add_division
   new_division = Division.create({name: division_name})
   clear
   puts "'#{division_name}' has been added.\n\n"
-  list_divisions
+  division_menu
 end
+
+def update_division
+  puts "\nWhich division do you want to edit?"
+  current_division = gets.chomp
+  editting_division = Division.where({name: current_division}).first
+  puts "Enter the New Name:"
+  edit_input = gets.chomp
+  editting_division.update({name: edit_input})
+  clear
+  puts "'#{current_division}' has been updated to: '#{edit_input}'"
+  division_menu
+end
+
+def delete_division
+  puts "Which division do you want to delete?"
+  current_division = gets.chomp
+  editting_division = Division.where({name: current_division}).first
+  editting_division.destroy
+  clear
+  puts "'#{current_division}' was fired."
+  division_menu
+end
+
+# ~~~~OTHER METHODS~~~~
 
 def clear
   system "clear && printf '\e[3J'"
