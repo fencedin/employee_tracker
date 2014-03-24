@@ -1,8 +1,10 @@
 require 'active_record'
+require 'pry'
 
 require './lib/employee.rb'
 require './lib/division.rb'
-require 'pry'
+require './lib/project.rb'
+
 
 database_configurations = YAML::load(File.open('./db/config.yml'))
 development_configuration = database_configurations['development']
@@ -16,10 +18,12 @@ end
 def main
   choice = nil
   until choice == 'x'
+    puts "********************************"
     puts "Press 'e' to view employee menu."
     puts "Press 'd' to view division menu."
+    puts "Press 'p' to view projects menu."
     puts "Press 'x' to exit."
-
+    puts "********************************"
     case gets.chomp.downcase
     when 'e'
       clear
@@ -27,6 +31,9 @@ def main
     when 'd'
       clear
       division_menu
+    when 'p'
+      clear
+      project_menu
     when 'x'
       clear
       puts "\nCiao!~\e[0m\n\n"
@@ -45,11 +52,13 @@ def employee_menu
   Employee.all.each do |emp|
     puts "\t\e[92m" + emp.name + " -- " + Division.where({id: emp.division_id})[0].name
   end
-  puts "\n\e[32mPress 'a' to add an employee."
+  puts "\n\e[32m*****************************************"
+  puts "Press 'a' to add an employee."
   puts "Press 'n' to update an employee name."
   puts "Press 'u' to update an employee division."
   puts "Press 'd' to delete an employee."
   puts "Press 'b' to go back to main menu"
+  puts "*****************************************"
   case gets.chomp.downcase
   when 'a'
     add_employee
@@ -103,13 +112,8 @@ def update_employee_id
   Division.all.each { |division| puts "\t\e[92m" + division.name }
   puts "\e[32mEnter the New Division:"
   division_input = gets.chomp
-
   id_to_update = Division.where({name: division_input})[0].id
-
   editting_employee.update({division_id: id_to_update})
-
-
-
   clear
   puts "'#{current_employee}' has been updated to: '#{division_input}'"
   employee_menu
@@ -130,10 +134,12 @@ end
 def division_menu
   puts "Here is all the division the compmany:\n\n"
   Division.all.each { |division| puts "\t\e[92m" + division.name }
-  puts "\n\e[32mPress 'a' to add a new division."
+  puts "\n\e[32m****************************************"
+  puts "Press 'a' to add a new division."
   puts "Press 'u' to update a division."
   puts "Press 'd' to delete a division."
   puts "Press 'b' to go back to main menu."
+  puts "****************************************"
   case gets.chomp
   when 'a'
     add_division
@@ -180,6 +186,87 @@ def delete_division
   clear
   puts "'#{current_division}' was fired."
   division_menu
+end
+
+# ~~~~PROJECT~~~~
+
+def project_menu
+  puts "All current projects:\n\n"
+  Project.all.each do |proj|
+    puts "\t\e[92m" + proj.name + " -- " + Employee.where({id: proj.employee_id})[0].name
+  end
+  puts "\n\e[32m****************************************"
+  puts "Press 'a' to add an project."
+  puts "Press 'n' to update an project name."
+  puts "Press 'u' to update an project employee."
+  puts "Press 'd' to delete an project."
+  puts "Press 'b' to go back to main menu"
+  puts "****************************************"
+  case gets.chomp.downcase
+  when 'a'
+    add_project
+  when 'n'
+    update_project_name
+  when 'u'
+    update_project_employee
+  when 'd'
+    delete_project
+  when 'b'
+    clear
+    main
+  else
+    puts "Not a valid option"
+    main
+  end
+end
+
+def add_project
+  puts "\nWhats the name of the project?:"
+  project_name = gets.chomp
+  puts "\nWhich employee is working on this project?:"
+  Employee.all.each { |emp| puts "\t\e[92m" + emp.name }
+  emp_name = gets.chomp
+  selected_emp = Employee.where({name: emp_name}).first
+  new_project = selected_emp.projects.create({name: project_name})
+  clear
+  puts "\e[32m'#{project_name}' is now being worked on by '#{emp_name}'.\n\n"
+  project_menu
+end
+
+def update_project_name
+  puts "Which project name do you want to edit?"
+  current_project = gets.chomp
+  editting_project = Project.where({name: current_project}).first
+  puts "Enter the New Name:"
+  edit_input = gets.chomp
+  editting_project.update({name: edit_input})
+  clear
+  puts "'#{current_project}' has been updated to: '#{edit_input}'"
+  project_menu
+end
+
+def update_project_employee
+  puts "Which project do you want to edit?"
+  current_project = gets.chomp
+  editting_project = Project.where({name: current_project}).first
+  Employee.all.each { |emp| puts "\t\e[92m" + emp.name }
+  puts "\e[32mEnter the New employee:"
+  employee_input = gets.chomp
+  id_to_update = Employee.where({name: employee_input})[0].id
+  editting_project.update({employee_id: id_to_update})
+  clear
+  puts "'#{employee_input}' is now working on: '#{current_project}'"
+  project_menu
+end
+
+def delete_project
+  puts "Which project do you want to delete?"
+  current_project = gets.chomp
+  editting_project = project.where({name: current_project}).first
+  editting_project.destroy
+  clear
+  puts "The company no longer supports: '#{current_project}'."
+  project_menu
 end
 
 # ~~~~OTHER METHODS~~~~
