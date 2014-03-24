@@ -11,7 +11,7 @@ development_configuration = database_configurations['development']
 ActiveRecord::Base.establish_connection(development_configuration)
 
 def welcome
-  puts "\e[32mWelcome to the employee tracker!"
+  puts "\e[34mWelcome to the employee tracker!"
   main
 end
 
@@ -50,9 +50,9 @@ end
 def employee_menu
   puts "All current employees:\n\n"
   Employee.all.each do |emp|
-    puts "\t\e[92m" + emp.name + " -- " + Division.where({id: emp.division_id})[0].name
+    puts "\t\e[94m" + emp.name + " -- " + Division.where({id: emp.division_id})[0].name
   end
-  puts "\n\e[32m*****************************************"
+  puts "\n\e[34m*****************************************"
   puts "Press 'a' to add an employee."
   puts "Press 'n' to update an employee name."
   puts "Press 'u' to update an employee division."
@@ -81,7 +81,7 @@ def add_employee
   puts "\nWhats the name of the employee?:"
   employee_name = gets.chomp
   puts "\nWhat division are they in?:"
-  Division.all.each { |division| puts "\t\e[92m" + division.name }
+  Division.all.each { |division| puts "\t\e[94m" + division.name }
   division_name = gets.chomp
 
   selected_division = Division.where({name: division_name}).first
@@ -89,7 +89,7 @@ def add_employee
   new_employee = selected_division.employees.create({name: employee_name})
 
   clear
-  puts "\e[32m'#{employee_name}' is now being tracked by the '#{division_name}'.\n\n"
+  puts "\e[34m'#{employee_name}' is now being tracked by the '#{division_name}'.\n\n"
   employee_menu
 end
 
@@ -109,8 +109,8 @@ def update_employee_id
   puts "Which employee division do you want to edit?"
   current_employee = gets.chomp
   editting_employee = Employee.where({name: current_employee}).first
-  Division.all.each { |division| puts "\t\e[92m" + division.name }
-  puts "\e[32mEnter the New Division:"
+  Division.all.each { |division| puts "\t\e[94m" + division.name }
+  puts "\e[34mEnter the New Division:"
   division_input = gets.chomp
   id_to_update = Division.where({name: division_input})[0].id
   editting_employee.update({division_id: id_to_update})
@@ -133,8 +133,8 @@ end
 
 def division_menu
   puts "Here is all the division the compmany:\n\n"
-  Division.all.each { |division| puts "\t\e[92m" + division.name }
-  puts "\n\e[32m****************************************"
+  Division.all.each { |division| puts "\t\e[94m" + division.name }
+  puts "\n\e[34m****************************************"
   puts "Press 'a' to add a new division."
   puts "Press 'u' to update a division."
   puts "Press 'd' to delete a division."
@@ -193,9 +193,10 @@ end
 def project_menu
   puts "All current projects:\n\n"
   Project.all.each do |proj|
-    puts "\t\e[92m" + proj.name + " -- " + Employee.where({id: proj.employee_id})[0].name
+    puts "\t\e[94m" + proj.name + ": " + proj.employees[0].name
+    # binding.pry
   end
-  puts "\n\e[32m****************************************"
+  puts "\n\e[34m****************************************"
   puts "Press 'a' to add an project."
   puts "Press 'n' to update an project name."
   puts "Press 'u' to update an project employee."
@@ -224,12 +225,12 @@ def add_project
   puts "\nWhats the name of the project?:"
   project_name = gets.chomp
   puts "\nWhich employee is working on this project?:"
-  Employee.all.each { |emp| puts "\t\e[92m" + emp.name }
+  Employee.all.each { |emp| puts "\t\e[94m" + emp.name }
   emp_name = gets.chomp
   selected_emp = Employee.where({name: emp_name}).first
   new_project = selected_emp.projects.create({name: project_name})
   clear
-  puts "\e[32m'#{project_name}' is now being worked on by '#{emp_name}'.\n\n"
+  puts "\e[34m'#{project_name}' is now being worked on by '#{emp_name}'.\n\n"
   project_menu
 end
 
@@ -249,11 +250,11 @@ def update_project_employee
   puts "Which project do you want to edit?"
   current_project = gets.chomp
   editting_project = Project.where({name: current_project}).first
-  Employee.all.each { |emp| puts "\t\e[92m" + emp.name }
-  puts "\e[32mEnter the New employee:"
+  Employee.all.each { |emp| puts "\t\e[94m" + emp.name }
+  puts "\e[34mEnter the New employee:"
   employee_input = gets.chomp
-  id_to_update = Employee.where({name: employee_input})[0].id
-  editting_project.update({employee_id: id_to_update})
+  emp_name_update = Employee.where({name: employee_input}).first
+  emp_name_update.update({projects: editting_project})
   clear
   puts "'#{employee_input}' is now working on: '#{current_project}'"
   project_menu
